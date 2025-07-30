@@ -6,23 +6,14 @@ public class MNG_Credits : MonoBehaviour
     public static MNG_Credits singleton;
 
     public Action onCreditsChange;
-    public Action onWinChange;
+    public Action onPayoutChange;
+
+    public int creditAmount { get; private set; } = 500;
+    public int payout { get; private set; }
 
 
-    public int creditAmmount { get; private set; }
-    public int winAmmount { get; private set; }
-
-
-    private void Awake() => SetInstance();
-    void Start()
-    {
-        
-    }
-    void Update()
-    {
-        
-    }
-    private void SetInstance()
+    private void Awake() => Initialize();
+    private void Initialize()
     {
         if (singleton != null)
             Destroy(this);
@@ -30,17 +21,27 @@ public class MNG_Credits : MonoBehaviour
         singleton = this;
     }
 
-    public bool CheckCreditAmmount(int creditAmountToCheck) => creditAmmount >= creditAmountToCheck;
-
-
     public void AddCredit(int creditAmountToAdd)
     {
-        creditAmmount += creditAmountToAdd;
+        creditAmount += creditAmountToAdd;
         onCreditsChange?.Invoke();
     }
-    public void RemoveCredit(int creditAmountToRemove)
+    public void RemoveCredit(int creditAmountToRemove = -1)
     {
-        creditAmmount -= creditAmountToRemove;
+        creditAmount -= creditAmountToRemove;
         onCreditsChange?.Invoke();
     }
+
+    public void AddPayout(int payoutToAdd)
+    {
+        payout += payoutToAdd;
+        onPayoutChange?.Invoke();
+    }
+
+    public void RemovePayout()
+    {
+        payout = 0;
+        onPayoutChange?.Invoke();
+    }
+
 }
