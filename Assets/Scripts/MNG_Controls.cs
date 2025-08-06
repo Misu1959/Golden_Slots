@@ -1,8 +1,7 @@
 using System;
 using UnityEngine;
 
-using static Data;
-using static UnityEngine.Rendering.DebugUI;
+using static Constants;
 
 public class MNG_Controls : MonoBehaviour
 {

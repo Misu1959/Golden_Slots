@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,14 @@ public enum Symbols
     scatter,
     wild
 }
+
+[Serializable]
+public enum DoubleDownCards
+{
+    red,
+    black
+};
+
 
 [Serializable]
 public enum BetAmounts
@@ -45,7 +54,7 @@ public class Reel
 {
     public Symbols[] squares { get; private set; }
 }
-public static class Data
+public static class Constants
 {
     public static int NR_OF_REELS => 5;    
     public static int NR_OF_SQUARES => 3;
@@ -59,10 +68,43 @@ public static class Data
         
 };
 
-//public static Dictionary<List<Symbols>, int> payoutTable = new Dictionary<List<Symbols>, int>
-//        {
-//            { new List<Symbols>{ Symbols.ten, Symbols.ten, Symbols.ten }, 10 },
+public static class PayData
+{
+    public static Dictionary<List<Symbols>, int> payTable = new Dictionary<List<Symbols>, int>
+        {
+            { new List<Symbols>{ Symbols.ten, Symbols.ten, Symbols.ten                                      }, 10 },
+            { new List<Symbols>{ Symbols.ten, Symbols.ten, Symbols.ten, Symbols.ten                         }, 20 },
+            { new List<Symbols>{ Symbols.ten, Symbols.ten, Symbols.ten, Symbols.ten, Symbols.ten            }, 50 },
 
-//            { new List<Symbols>{ Symbols.ten, Symbols.ten, Symbols.ten, Symbols.ten }, 20 },
-//            { new List<Symbols>{ Symbols.ten, Symbols.ten, Symbols.ten, Symbols.ten,Symbols.ten }, 50 }
-//        };
+            { new List<Symbols>{ Symbols.jack, Symbols.jack, Symbols.jack                                   }, 10 },
+            { new List<Symbols>{ Symbols.jack, Symbols.jack, Symbols.jack, Symbols.jack                     }, 20 },
+            { new List<Symbols>{ Symbols.jack, Symbols.jack, Symbols.jack, Symbols.jack, Symbols.jack       }, 50 },
+
+            { new List<Symbols>{ Symbols.queen, Symbols.queen, Symbols.queen                                }, 10 },
+            { new List<Symbols>{ Symbols.queen, Symbols.queen, Symbols.queen, Symbols.queen                 }, 20 },
+            { new List<Symbols>{ Symbols.queen, Symbols.queen, Symbols.queen, Symbols.queen, Symbols.queen  }, 50 },
+
+            { new List<Symbols>{ Symbols.king, Symbols.king, Symbols.king                                   }, 10 },
+            { new List<Symbols>{ Symbols.king, Symbols.king, Symbols.king, Symbols.king                     }, 20 },
+            { new List<Symbols>{ Symbols.king, Symbols.king, Symbols.king, Symbols.king, Symbols.king       }, 50 },
+
+            { new List<Symbols>{ Symbols.ace, Symbols.ace, Symbols.ace                                      }, 10 },
+            { new List<Symbols>{ Symbols.ace, Symbols.ace, Symbols.ace, Symbols.ace                         }, 20 },
+            { new List<Symbols>{ Symbols.ace, Symbols.ace, Symbols.ace, Symbols.ace, Symbols.ace            }, 50 },
+
+
+            { new List<Symbols>{ Symbols.symbol_1, Symbols.symbol_1, Symbols.symbol_1                                       }, 10 },
+            { new List<Symbols>{ Symbols.symbol_1, Symbols.symbol_1, Symbols.symbol_1, Symbols.symbol_1                     }, 20 },
+            { new List<Symbols>{ Symbols.symbol_1, Symbols.symbol_1, Symbols.symbol_1, Symbols.symbol_1, Symbols.symbol_1   }, 50 },
+
+            { new List<Symbols>{ Symbols.symbol_2, Symbols.symbol_2, Symbols.symbol_2                                       }, 10 },
+            { new List<Symbols>{ Symbols.symbol_2, Symbols.symbol_2, Symbols.symbol_2, Symbols.symbol_2                     }, 20 },
+            { new List<Symbols>{ Symbols.symbol_2, Symbols.symbol_2, Symbols.symbol_2, Symbols.symbol_2, Symbols.symbol_2   }, 50 },
+
+            { new List<Symbols>{ Symbols.symbol_3, Symbols.symbol_3, Symbols.symbol_3                                       }, 10 },
+            { new List<Symbols>{ Symbols.symbol_3, Symbols.symbol_3, Symbols.symbol_3, Symbols.symbol_3                     }, 20 },
+            { new List<Symbols>{ Symbols.symbol_3, Symbols.symbol_3, Symbols.symbol_3, Symbols.symbol_3, Symbols.symbol_3   }, 50 },
+
+    };
+
+};

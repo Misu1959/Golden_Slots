@@ -1,5 +1,4 @@
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +6,7 @@ public class MNG_UI : MonoBehaviour
 {
     public static MNG_UI singleton;
 
-    [Header("Settings")]
+[Header("Settings")]
     [SerializeField] private GameObject panelSettings;
 
     [SerializeField] private Button buttonOpenSettings;
@@ -16,7 +15,7 @@ public class MNG_UI : MonoBehaviour
     [SerializeField] private Slider sliderMusic;
     [SerializeField] private Slider sliderSounds;
 
-    [Header("Credits")]
+[Header("Credits")]
     [SerializeField] private TextMeshProUGUI textCredits;
     [SerializeField] private TextMeshProUGUI textPayout;
     [SerializeField] private TextMeshProUGUI textFreeSpins;
@@ -35,11 +34,24 @@ public class MNG_UI : MonoBehaviour
     [SerializeField] private Button buttonIncreaseLines;
     [SerializeField] private Button buttonDecreaseLines;
 
-    [Header("Spin")]
+    [Header("\tSpin")]
     [SerializeField] private Button buttonSpin;
-    [SerializeField] private Button buttonTakeWin;
+    [SerializeField] private Button buttonTakePayout;
     [SerializeField] private Button buttonDoubleDown;
 
+
+    [Header("Double Down")]
+
+    [SerializeField] private GameObject panelDoubleDown;
+    [Header("\tButtons")]
+    [SerializeField] private Button buttonTakeDoublePayout;
+    [SerializeField] private Button buttonRed;
+    [SerializeField] private Button buttonBlack;
+
+    [Header("\tTexts")]
+    [SerializeField] private TextMeshProUGUI textDoublePayout;
+    [SerializeField] private TextMeshProUGUI textNextDoublePayout;
+    [SerializeField] private TextMeshProUGUI textDoublesLeft;
 
     private void Awake() => Initialize();
 
@@ -49,6 +61,8 @@ public class MNG_UI : MonoBehaviour
         SetCreditsPanel();
         SetControlsPanel();
         SetSpinControls();
+
+        SetDoubleDownPanel();
     }
 
 
@@ -77,21 +91,18 @@ public class MNG_UI : MonoBehaviour
     private void SetCreditsPanel()
     {
         DisplayCreditAmount();
-        DisplayWinAmount();
+        DisplayPayoutAmount();
 
         MNG_Credits.singleton.onCreditsChange += DisplayCreditAmount;
-        MNG_Credits.singleton.onPayoutChange += DisplayWinAmount;
-
-        MNG_Slot.singleton.onEnterFreeSpinsMode += ActivateFreeSpinsText;
+        MNG_Credits.singleton.onPayoutChange += DisplayPayoutAmount;
     }
 
-    private void DisplayCreditAmount()
-        => textCredits.text = "Credits: "+ MNG_Credits.singleton.creditAmount;
-    private void DisplayWinAmount()
-        => textPayout.text = "Win: " + MNG_Credits.singleton.payout;
+    private void DisplayCreditAmount() => textCredits.text = "Credits: " + MNG_Credits.singleton.creditAmount;
+    private void DisplayPayoutAmount() => textPayout.text = "Win: " + MNG_Credits.singleton.payout;
     
-    private void ActivateFreeSpinsText()
-        => textFreeSpins.gameObject.SetActive(true);
+    
+    private void ActivateFreeSpinsText(bool mode) => textFreeSpins.gameObject.SetActive(mode);
+
 
     #endregion
 
@@ -117,10 +128,9 @@ public class MNG_UI : MonoBehaviour
         SetMaxBetButton();
     }
 
-    private void DisplayTotalBetAmount()
-        => textTotalBet.text = "Total Bet: " + MNG_Controls.singleton.totalBet;
-    private void DisplayBetAmount()
-        => textBet.text = "Bet: " + (int)MNG_Controls.singleton.bet;
+    private void DisplayTotalBetAmount() => textTotalBet.text = "Total Bet: " + MNG_Controls.singleton.totalBet;
+    private void DisplayBetAmount() => textBet.text = "Bet: " + (int)MNG_Controls.singleton.bet;
+
 
 
     private void SetIncreaseBetButton()
@@ -146,15 +156,16 @@ public class MNG_UI : MonoBehaviour
     }
 
     
-    private void EnableIncreaseBetButton()
-        => buttonIncreaseBet.interactable = MNG_Controls.singleton.bet != Data.MAX_BET;
-    private void EnableDecreaseBetButton()
-        => buttonDecreaseBet.interactable = MNG_Controls.singleton.bet != Data.MIN_BET;
+    private void EnableIncreaseBetButton() => buttonIncreaseBet.interactable = MNG_Controls.singleton.bet != Constants.MAX_BET;
+    private void EnableDecreaseBetButton() => buttonDecreaseBet.interactable = MNG_Controls.singleton.bet != Constants.MIN_BET;
 
 
-    private void DisplayNrOfLines()
-        => textLines.text = "Lines: " + (int)MNG_Controls.singleton.lines;
+
+
+
+    private void DisplayNrOfLines() => textLines.text = "Lines: " + (int)MNG_Controls.singleton.lines;
     
+
     private void SetIncreaseLinesButton()
     { 
         buttonIncreaseLines.onClick.AddListener(MNG_Controls.singleton.IncreaseLines);
@@ -169,12 +180,10 @@ public class MNG_UI : MonoBehaviour
         buttonDecreaseLines.onClick.AddListener(EnableIncreaseLinesButton);
         buttonDecreaseLines.onClick.AddListener(EnableDecreaseLinesButton);
     }
+    
 
-    private void EnableIncreaseLinesButton()
-        => buttonIncreaseLines.interactable = MNG_Controls.singleton.lines != Data.MAX_NR_OF_LINES;
-    private void EnableDecreaseLinesButton()
-        => buttonDecreaseLines.interactable = MNG_Controls.singleton.lines != Data.MIN_NR_OF_LINES;
-
+    private void EnableIncreaseLinesButton() => buttonIncreaseLines.interactable = MNG_Controls.singleton.lines != Constants.MAX_NR_OF_LINES;
+    private void EnableDecreaseLinesButton() => buttonDecreaseLines.interactable = MNG_Controls.singleton.lines != Constants.MIN_NR_OF_LINES;
     #endregion
 
     #region Spin Panel
@@ -182,41 +191,79 @@ public class MNG_UI : MonoBehaviour
     private void SetSpinControls()
     {
         SetSpinButton();
-        SetTakeWinButton();
+        SetTakePayoutButton();
         SetDoubleDownButton();
     }
 
     private void SetSpinButton()
     {
         MNG_Controls.singleton.onTotalBetChange += EnableSpinButton;
+        MNG_Credits.singleton.onCreditsChange += EnableSpinButton;
 
-        buttonSpin.onClick.AddListener(MNG_Slot.singleton.Spin);
+        buttonSpin.onClick.AddListener(MNG_Base.singleton.Spin);
     }
 
-    private void SetTakeWinButton()
+    private void SetTakePayoutButton()
     {
-        MNG_Credits.singleton.onPayoutChange += ActivateTakeWinButton;
-
-        buttonTakeWin.onClick.AddListener(MNG_Slot.singleton.TakeWin);
+        MNG_Credits.singleton.onPayoutChange += () => ActivateTakePayoutButton(true);
+        MNG_Credits.singleton.onPayoutReset += () => ActivateTakePayoutButton(false);
+        
+        buttonTakePayout.onClick.AddListener(MNG_Base.singleton.TakeWin);
     }
 
     private void SetDoubleDownButton()
     {
-        MNG_Credits.singleton.onPayoutChange += ActivateDoubleDownButton;
+        MNG_Credits.singleton.onPayoutChange += () => ActivateDoubleDownButton(true);
+        MNG_Credits.singleton.onPayoutReset += () => ActivateDoubleDownButton(false);
 
-        buttonDoubleDown.onClick.AddListener(MNG_Slot.singleton.EnterDoubleDownMode);
+        buttonDoubleDown.onClick.AddListener(MNG_DoubleDown.singleton.EnterDD);
     }
 
 
-    private void EnableSpinButton()
-        => buttonSpin.interactable = MNG_Credits.singleton.creditAmount >= MNG_Controls.singleton.totalBet;
+    private void EnableSpinButton() => buttonSpin.interactable = MNG_Credits.singleton.creditAmount >= MNG_Controls.singleton.totalBet;
+    private void ActivateTakePayoutButton(bool mode) => buttonTakePayout.gameObject.SetActive(mode);
+    private void ActivateDoubleDownButton(bool mode) => buttonDoubleDown.gameObject.SetActive(mode);
 
-    private void ActivateTakeWinButton()
-        =>  buttonTakeWin.gameObject.SetActive(MNG_Credits.singleton.payout != 0);
 
-    private void ActivateDoubleDownButton()
-        =>  buttonDoubleDown.gameObject.SetActive(MNG_Credits.singleton.payout != 0);
+    #endregion
 
+    #region Panel DoubleDown
+
+    private void SetDoubleDownPanel()
+    {
+        MNG_DoubleDown.singleton.onEnterDD += () => ActivateDoubleDownPanel(true);
+        MNG_DoubleDown.singleton.onExitDD  += () => ActivateDoubleDownPanel(false);
+        
+        SetDoubleDownButtons();
+        SetDoubleDownTexts();
+    }
+
+    private void ActivateDoubleDownPanel(bool mode) => panelDoubleDown.SetActive(mode);
+    private void SetDoubleDownButtons()
+    {
+        SetTakeDoubleDownPayoutButton();
+        SetChooseRedButton();
+        SetChooseBlackButton();
+    }
+    private void SetDoubleDownTexts()
+    {
+        MNG_Credits.singleton.onPayoutChange += DisplayDoublePayoutAmount;
+        MNG_Credits.singleton.onPayoutChange += DisplayNextDoublePayoutAmount;
+        MNG_Credits.singleton.onPayoutChange += DisplayNrDoublesLeft;
+    }
+
+
+
+
+    private void SetTakeDoubleDownPayoutButton()    => buttonTakeDoublePayout.onClick.AddListener(MNG_DoubleDown.singleton.TakeWin); 
+    private void SetChooseRedButton()               => buttonRed.onClick.AddListener(() => MNG_DoubleDown.singleton.PickCard(DoubleDownCards.red));
+    private void SetChooseBlackButton()             => buttonBlack.onClick.AddListener(() => MNG_DoubleDown.singleton.PickCard(DoubleDownCards.black));
+
+
+
+    private void DisplayDoublePayoutAmount()        => textDoublePayout.text = "Win: " + MNG_Credits.singleton.payout;
+    private void DisplayNextDoublePayoutAmount()    => textNextDoublePayout.text = "Double for: " + MNG_Credits.singleton.payout * 2;
+    private void DisplayNrDoublesLeft()             => textDoublesLeft.text = "Doubles left: " + 5;
 
     #endregion
 }
