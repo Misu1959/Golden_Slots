@@ -39,6 +39,9 @@ public class MNG_Credits : MonoBehaviour
 
     public void AddPayout(int payoutToAdd)
     {
+        if (payoutToAdd == 0)
+            return;
+
         payout += payoutToAdd;
         onPayoutChange?.Invoke();
     }

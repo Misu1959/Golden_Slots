@@ -14,7 +14,7 @@ public class MNG_Controls : MonoBehaviour
 
     public int totalBet { get; private set; } // total bet = bet * lines
     public BetAmounts bet { get; private set; } = BetAmounts._10;
-    public LinesAmount lines    { get; private set; } = LinesAmount._5;
+    public LinesAmount lines    { get; private set; } = LinesAmount._3;
 
 
     private void Awake() => Initialize();

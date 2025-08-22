@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 
@@ -6,9 +5,7 @@ public class MNG_Base : MonoBehaviour
 {
     public static MNG_Base singleton;
 
-    private Reel[] reels = new Reel[Constants.NR_OF_REELS] { new Reel(0), new Reel(1), new Reel(2), new Reel(3), new Reel(4) };
-
-
+    public Reel[] reels { get; private set; } = new Reel[Constants.NR_OF_REELS] { new Reel(0), new Reel(1), new Reel(2), new Reel(3), new Reel(4) };
 
 
     private void Awake() => Initialize();
@@ -22,10 +19,11 @@ public class MNG_Base : MonoBehaviour
 
     public void Spin()
     {
+        SetReels();
+
+
         MNG_Credits.singleton.RemoveCredit(MNG_Controls.singleton.totalBet);
         MNG_Credits.singleton.AddPayout(MNG_Payment.singleton.CalculateTotalPayout());
-
-        SetReels();
     }
 
     public void TakeWin()
@@ -39,12 +37,5 @@ public class MNG_Base : MonoBehaviour
         foreach (Reel reel in reels)
             reel.Stop();
 
-        foreach (Reel reel in reels)
-        {
-            foreach (Symbols symbol in reel.Get())
-                Debug.Log(symbol);
-
-            Debug.Log("\n");
-        }
     }
 }
