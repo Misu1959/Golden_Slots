@@ -29,6 +29,7 @@ public class M_UI_Controls : MonoBehaviour
     [Header("Spin")]
     [SerializeField] private Button buttonSpin;
     [SerializeField] private Button buttonTakePayout;
+    [SerializeField] private Button buttonSkipAnimations;
 
     private void Awake() => Initialize();
 
@@ -45,11 +46,24 @@ public class M_UI_Controls : MonoBehaviour
 
     private void Setup()
     {
+        SetInfoControls();
         SetAutoSpinsControls();
         SetLinesControls();
         SetBetControls();
         SetSpinControls();
     }
+
+    #region Info
+
+    private void SetInfoControls()
+    {
+        SetInfoButton();
+    }
+    private void SetInfoButton()
+        => buttonInfo.onClick.AddListener(M_UI_Info.singleton.OpenInfoPanel);
+
+    #endregion
+
 
     #region Auto Spins
 
@@ -139,6 +153,7 @@ public class M_UI_Controls : MonoBehaviour
     {
         SetSpinButton();
         SetTakePayoutButton();
+        SetSkipAnimationsButton();
     }
 
     private void SetSpinButton()
@@ -155,10 +170,12 @@ public class M_UI_Controls : MonoBehaviour
 
         buttonTakePayout.onClick.AddListener(M_Credits.singleton.TakeWin);
     }
-
+    private void SetSkipAnimationsButton()
+        => buttonSkipAnimations.onClick.AddListener(M_UI_Reels.singleton.SkipAnimations);
 
     private void ToggleSpinButton() => buttonSpin.interactable = M_Credits.singleton.creditAmount >= M_Controls.singleton.totalBet;
     private void ToggleTakePayoutButton() => buttonTakePayout.gameObject.SetActive(M_Credits.singleton.payout > 0);
+    public void ToggleSkipAnimationsButton(bool state) => buttonSkipAnimations.gameObject.SetActive(state);
 
 
     #endregion

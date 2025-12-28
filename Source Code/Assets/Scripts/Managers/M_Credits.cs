@@ -33,7 +33,6 @@ public class M_Credits : MonoBehaviour
     private void Setup()
     {
         M_Controls.singleton.onSpin += () => RemoveCredit(M_Controls.singleton.totalBet);
-        M_Controls.singleton.onSpin += () => Invoke(nameof(AddSpinPayout), Time.deltaTime);
     }
     public void TakeWin()
     {
@@ -53,9 +52,7 @@ public class M_Credits : MonoBehaviour
     }
 
 
-    private void AddSpinPayout()
-        => AddPayout(M_Payment.singleton.CalculateTotalPayout());
-    private void AddPayout(int payoutToAdd)
+    public void AddPayout(int payoutToAdd)
     {
         if (payoutToAdd == 0)
             return;

@@ -1,16 +1,35 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static Constants;
 
 public class M_UI_Reels : MonoBehaviour
 {
     public static M_UI_Reels singleton;
 
+    [Header("Assets")]
+    [SerializeField] private List<Sprite> paylineNumbersOn;
+    [SerializeField] private List<Sprite> paylineNumbersOff;
+
+    [SerializeField] private List<Sprite> symbolBorders;
+
+
+
+
+    [Header("In scene Objects")]
+
+    [SerializeField] private List<RectTransform> UI_paylinesNumbers;
+
     [SerializeField] private List<RectTransform> UI_paylines;
 
     [SerializeField] private List<RectTransform> UI_reels;
 
-    [SerializeField] private List<Sprite> sprites;
+
+    private float animTime_Spin;
+    private float animTime_PayLine;
+    private bool skipAnimations;
+
 
 
     private void Awake() => Initialize();
@@ -28,20 +47,143 @@ public class M_UI_Reels : MonoBehaviour
 
     private void Setup()
     {
-        M_Controls.singleton.onSpin += () => Invoke(nameof(DisplayReels), Time.deltaTime);
-
+        M_Controls.singleton.onLinesChange += DisplayActivePaylinesNumbers;
+        M_Controls.singleton.onSpin += () => StartCoroutine(AnimateScreen());
     }
 
-    #region Paylines
-    public void ToggleDisplayPayline(int paylineIndex, bool isWinning)
+    public void SkipAnimations()
     {
-        UI_paylines[paylineIndex].gameObject.SetActive(isWinning);
+        skipAnimations = true;
+
+        foreach (RectTransform uiReel in UI_reels)
+            uiReel.GetComponent<UI_Reel>().ForceStop();
     }
 
-    #endregion
+
+    public void DisplayActivePaylinesNumbers()
+    {
+        foreach(RectTransform paylineNumber in UI_paylinesNumbers)
+        {
+            int number = int.Parse(paylineNumber.name);
+            Sprite sprite;
+            
+            if (number <= (int)M_Controls.singleton.lines)
+                sprite = paylineNumbersOn[number - 1];
+            else
+                sprite = paylineNumbersOff[number - 1];
+
+            paylineNumber.GetComponent<Image>().sprite = sprite;
+        }
+    }
+
+    private IEnumerator AnimateScreen()
+    {
+        M_UI_Controls.singleton.ToggleSkipAnimationsButton(true);
+        
+        DisplayReels();
+
+        foreach (RectTransform uiReel in UI_reels)
+            uiReel.GetComponent<UI_Reel>().StartSpin();
+
+        animTime_Spin = 0;
+        while (animTime_Spin < ANIM_TIME_SPIN)
+        {
+            if (skipAnimations)
+                break;
+            
+            animTime_Spin += Time.deltaTime;
+            yield return null;
+        }
+        
 
 
-    #region Reels
+        // Turn off all unused Paylines
+        for (int i = (int)M_Controls.singleton.lines; i < (int)MAX_NR_OF_LINES; i++)
+            TurnOffPayline(M_Payment.singleton.payLines[i]);
+
+        // Turn on all used winning paylines
+        for (int i = 0; i < (int)M_Controls.singleton.lines; i++)
+        {
+            PayLine payLine = M_Payment.singleton.payLines[i];
+
+            M_Credits.singleton.AddPayout(M_Payment.singleton.CalculatePayLine(payLine));
+            
+            if (payLine.IsWinning())
+            {
+                TurnOnPayline(payLine);
+
+                animTime_PayLine = 0;
+                while (animTime_PayLine < ANIM_TIME_PER_PAYLINE)
+                {
+                    if (skipAnimations)
+                        break;
+
+                    animTime_PayLine += Time.deltaTime;
+                    yield return null;
+                }
+                
+                TurnOffPayline(payLine);
+            }
+        }
+
+        M_UI_Controls.singleton.ToggleSkipAnimationsButton(false);
+        skipAnimations = false;
+    }
+    private void TurnOffPayline(PayLine payline)
+    {
+        UI_paylines[payline.index].gameObject.SetActive(false);
+    
+        for(int i = 0; i < payline.reelSquare.Count; i++)
+        {
+            int reelIndex   = payline.reelSquare[i].Item1;
+            int squareIndex = payline.reelSquare[i].Item2;
+
+            StartCoroutine(TurnSymbolFrameOff(reelIndex, squareIndex));
+        }
+    }
+
+    private void TurnOnPayline(PayLine payline)
+    {
+        UI_paylines[payline.index].gameObject.SetActive(true);
+
+
+        for (int i = 0; i < payline.symbols.Count; i++)
+        {
+            int reelIndex = payline.reelSquare[i].Item1;
+            int squareIndex = payline.reelSquare[i].Item2;
+
+            StartCoroutine(TurnSymbolFrameOn(payline.index, reelIndex, squareIndex));
+        }
+    }
+
+
+    public IEnumerator TurnSymbolFrameOff(int reelIndex, int squareIndex)
+    {
+        Transform UI_square = UI_reels[reelIndex].GetChild(0).GetChild(squareIndex + 1);
+
+        Transform UI_frame = UI_square.GetChild(0);
+        UI_frame.gameObject.SetActive(false);
+
+        yield return null;
+
+        UI_square.GetComponent<Animator>().SetBool("IsWinning", false);
+    }
+
+    public IEnumerator TurnSymbolFrameOn(int paylineIndex, int reelIndex, int squareIndex)
+    {
+        Transform UI_square = UI_reels[reelIndex].GetChild(0).GetChild(squareIndex + 1);
+        
+        Transform UI_frame = UI_square.GetChild(0);
+        UI_frame.gameObject.SetActive(true);
+        UI_frame.GetChild(0).GetComponent<Image>().sprite = symbolBorders[paylineIndex];
+
+
+        yield return null;
+
+        UI_square.GetComponent<Animator>().SetBool("IsWinning", true);
+    }
+
+
     private void DisplayReels()
     {
         foreach (Reel reel in M_Reels.singleton.reels)
@@ -50,29 +192,7 @@ public class M_UI_Reels : MonoBehaviour
 
     private void DisplayReel(Reel reel)
     {
-        for (int squareIndex = 0; squareIndex < Constants.NR_OF_SQUARES; squareIndex++)
-            DisplaySymbol(reel.index, squareIndex, sprites[(int)reel.squares[squareIndex]]);
+        for (int squareIndex = 0; squareIndex < NR_OF_SQUARES; squareIndex++)
+            UI_reels[reel.index].GetChild(0).GetChild(squareIndex+1).GetComponent<Animator>().SetInteger("AnimNumber", (int)reel.squares[squareIndex]);
     }
-
-
-    public void DisplaySymbol(int reelIndex,int squareIndex, Sprite sprite)
-    {
-        Transform UI_symbol = UI_reels[reelIndex].GetChild(squareIndex).GetChild(1);
-        UI_symbol.GetComponent<Image>().sprite = sprite;
-    }
-
-    public void TurnSymbolFrameOn(int reelIndex, int squareIndex)
-    {
-        Transform UI_frame = UI_reels[reelIndex].GetChild(squareIndex).GetChild(0);
-        UI_frame.gameObject.SetActive(true);
-    }
-    public void TurnSymbolFrameOff(int reelIndex, int squareIndex)
-    {
-        Transform UI_frame = UI_reels[reelIndex].GetChild(squareIndex).GetChild(0);
-        UI_frame.gameObject.SetActive(false);
-    }
-
-
-    #endregion
-
 }
