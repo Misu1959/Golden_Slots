@@ -1,0 +1,5 @@
+Copyright (c) 2025 Costea Mihai
+
+You may use and redistribute this release as-is.  
+Modifications or derivative works are NOT allowed.  
+Include this notice with any redistribution.
