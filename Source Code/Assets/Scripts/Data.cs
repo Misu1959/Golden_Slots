@@ -95,7 +95,8 @@ public class Constants
 
     public const float ANIM_TIME_SPIN           = 3;
     public const float ANIM_TIME_PER_PAYLINE    = 1;
-        
+    
+    public const float TIME_AUTO_SPINS          = .5f;
 };
 
 

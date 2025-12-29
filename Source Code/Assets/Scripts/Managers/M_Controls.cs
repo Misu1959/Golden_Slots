@@ -20,6 +20,9 @@ public class M_Controls : MonoBehaviour
     public int totalBet { get; private set; } // total bet = bet * lines
 
 
+    public int autoSpinsLeft { get; private set; } = (int)MIN_NR_OF_AUTO_SPINS;
+    public bool isAutoSpinning { get; private set; }
+
     private void Awake() => Initialize();
     void Start() => Invoke(nameof(Setup), Time.deltaTime);
     private void Initialize()
@@ -41,6 +44,28 @@ public class M_Controls : MonoBehaviour
     }
 
     #region Auto Spins
+
+    public void StartAutoSpinning()
+    {
+        M_Credits.singleton.TakeWin();
+
+        isAutoSpinning = true;
+        autoSpinsLeft--;
+
+        onSpin?.Invoke();
+        onAutoSpinsChange?.Invoke();
+    }
+
+    public void StopAutoSpinning()
+    {
+        autoSpinsLeft = (int)autoSpins;
+        isAutoSpinning = false;
+
+        onAutoSpinsChange?.Invoke();
+    }
+
+
+
     public void DecreaseAutoSpins()
     {
         if (autoSpins == MIN_NR_OF_AUTO_SPINS)
@@ -49,6 +74,7 @@ public class M_Controls : MonoBehaviour
         AutoSpinAmounts[] values = (AutoSpinAmounts[])Enum.GetValues(typeof(AutoSpinAmounts));
         int index = Array.IndexOf(values, autoSpins);
         autoSpins = values[index - 1];
+        autoSpinsLeft = (int)autoSpins;
 
         onAutoSpinsChange?.Invoke();
     }
@@ -60,15 +86,13 @@ public class M_Controls : MonoBehaviour
         AutoSpinAmounts[] values = (AutoSpinAmounts[])Enum.GetValues(typeof(AutoSpinAmounts));
         int index = Array.IndexOf(values, autoSpins);
         autoSpins = values[index + 1];
+        autoSpinsLeft = (int)autoSpins;
 
         onAutoSpinsChange?.Invoke();
     }
 
 
-    public void StartAutoSpins()
-    {
 
-    }
 
     #endregion
 

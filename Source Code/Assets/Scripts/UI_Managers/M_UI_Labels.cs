@@ -47,7 +47,7 @@ public class M_UI_Labels : MonoBehaviour
     private void DisplayCredit() => labelCredits.text = M_Credits.singleton.creditAmount.ToString();
     private void DisplayPayout() => labelPayout.text = (M_Credits.singleton.payout == 0) ? string.Empty : M_Credits.singleton.payout.ToString();
 
-    private void DisplayAutoSpins() => labelAutoSpins.text = ((int)M_Controls.singleton.autoSpins).ToString(); 
+    private void DisplayAutoSpins() => labelAutoSpins.text = M_Controls.singleton.autoSpinsLeft.ToString(); 
     private void DisplayLines() => labelLines.text = ((int)M_Controls.singleton.lines).ToString();
     private void DisplayBet() => labelBet.text = ((int)M_Controls.singleton.bet).ToString();
     private void DisplayTotalBet() => labelTotalBet.text = M_Controls.singleton.totalBet.ToString();

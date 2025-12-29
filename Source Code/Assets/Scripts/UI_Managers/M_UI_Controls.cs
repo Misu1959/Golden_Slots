@@ -29,6 +29,7 @@ public class M_UI_Controls : MonoBehaviour
     [Header("Spin")]
     [SerializeField] private Button buttonSpin;
     [SerializeField] private Button buttonTakePayout;
+    [SerializeField] private Button buttonStopAutoSpins;
     [SerializeField] private Button buttonSkipAnimations;
 
     private bool overrideControls;
@@ -85,16 +86,31 @@ public class M_UI_Controls : MonoBehaviour
 
     #endregion
 
+
     #region Auto Spins
 
     private void SetAutoSpinsControls()
     {
         M_Controls.singleton.onAutoSpinsChange += EnableDecreaseAutoSpinsButton;
         M_Controls.singleton.onAutoSpinsChange += EnableIncreaseAutoSpinsButton;
-        
+
         SetDecreaseAutoSpinsButton();
         SetIncreaseAutoSpinsButton();
+    
+        SetAutoSpinButton();
+        SetStopAutoSpinButton();
     }
+
+
+    private void SetAutoSpinButton()
+        => buttonStartAutoSpins.onClick.AddListener(M_Controls.singleton.StartAutoSpinning);
+
+    private void SetStopAutoSpinButton()
+    {
+        buttonStopAutoSpins.onClick.AddListener(M_Controls.singleton.StopAutoSpinning);
+        buttonStopAutoSpins.onClick.AddListener(() => ToggleStopAutoSpinsButton(false));
+    }
+
     private void SetDecreaseAutoSpinsButton()
         => buttonDecreaseAutoSpins.onClick.AddListener(M_Controls.singleton.DecreaseAutoSpins);
 
@@ -111,6 +127,7 @@ public class M_UI_Controls : MonoBehaviour
 
     private void EnableIncreaseAutoSpinsButton()
         => buttonIncreaseAutoSpins.interactable = (overrideControls) ? false : M_Controls.singleton.autoSpins != Constants.MAX_NR_OF_AUTO_SPINS;
+
 
 
     #endregion
@@ -208,7 +225,11 @@ public class M_UI_Controls : MonoBehaviour
         => buttonSkipAnimations.onClick.AddListener(M_UI_Reels.singleton.SkipAnimations);
 
     private void ToggleSpinButton() => buttonSpin.interactable = M_Credits.singleton.creditAmount >= M_Controls.singleton.totalBet;
+
     private void ToggleTakePayoutButton() => buttonTakePayout.gameObject.SetActive(M_Credits.singleton.payout > 0);
+
+    public void ToggleStopAutoSpinsButton(bool state) => buttonStopAutoSpins.gameObject.SetActive(state);
+
     public void ToggleSkipAnimationsButton(bool state) => buttonSkipAnimations.gameObject.SetActive(state);
 
 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a273965f213d8e84ab0e9b63954e80f3
+guid: 15868ff0a4d3d3e489d6bce3bb774ba2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8820312306304374072
-    second: Teke Win - Pressed_0
+      213: 7996278233327661752
+    second: Take Win - Pressed_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Teke Win - Pressed_0
+      name: Take Win - Pressed_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8caa8be70b4f79580800000000000000
-      internalID: -8820312306304374072
+      spriteID: 8b2fea6efac78fe60800000000000000
+      internalID: 7996278233327661752
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Teke Win - Pressed_0: -8820312306304374072
+      Take Win - Pressed_0: 7996278233327661752
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8b6ae6c3d0b30944db1552f820e8a1db
+guid: 9742b09a754fd034997b8cec6815eef3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4290090541474028433
-    second: Take Win - Normal_0
+      213: -2166400457486193320
+    second: Stop - Highlighted_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Take Win - Normal_0
+      name: Stop - Highlighted_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 19b92da1e96798b30800000000000000
-      internalID: 4290090541474028433
+      spriteID: 85daa4213466fe1e0800000000000000
+      internalID: -2166400457486193320
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Take Win - Normal_0: 4290090541474028433
+      Stop - Highlighted_0: -2166400457486193320
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

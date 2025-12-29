@@ -26,9 +26,6 @@ public class M_UI_Reels : MonoBehaviour
     [SerializeField] private List<RectTransform> UI_reels;
 
 
-    private float animTime_Spin;
-    private float animTime_PayLine;
-
     private bool skipSpinAnimation;
     private bool skipPayoutAnimation;
 
@@ -83,6 +80,8 @@ public class M_UI_Reels : MonoBehaviour
 
     private IEnumerator AnimateScreen()
     {
+        M_UI_Controls.singleton.ToggleStopAutoSpinsButton(M_Controls.singleton.isAutoSpinning);
+
         M_UI_Controls.singleton.ToggleSkipAnimationsButton(true);
         M_UI_Controls.singleton.OverrideControls(true);
 
@@ -91,7 +90,7 @@ public class M_UI_Reels : MonoBehaviour
         foreach (RectTransform uiReel in UI_reels)
             uiReel.GetComponent<UI_Reel>().StartSpin();
 
-        animTime_Spin = 0;
+        float animTime_Spin = 0;
         while (animTime_Spin < ANIM_TIME_SPIN)
         {
             if (skipSpinAnimation)
@@ -123,7 +122,7 @@ public class M_UI_Reels : MonoBehaviour
             
             TurnOnPayline(payLine);
 
-            animTime_PayLine = 0;
+            float animTime_PayLine = 0;
             while (animTime_PayLine < ANIM_TIME_PER_PAYLINE)
             {
                 if (skipPayoutAnimation)
@@ -139,8 +138,28 @@ public class M_UI_Reels : MonoBehaviour
         skipSpinAnimation = false;
         skipPayoutAnimation = false;
 
-        M_UI_Controls.singleton.ToggleSkipAnimationsButton(false);
-        M_UI_Controls.singleton.OverrideControls(false);
+
+        if (!M_Controls.singleton.isAutoSpinning || M_Controls.singleton.autoSpinsLeft == 0)
+        {
+            M_UI_Controls.singleton.ToggleSkipAnimationsButton(false);
+            M_UI_Controls.singleton.ToggleStopAutoSpinsButton(false);
+            
+            M_UI_Controls.singleton.OverrideControls(false);
+        }
+
+
+        if (M_Controls.singleton.isAutoSpinning)
+        {
+            if (M_Controls.singleton.autoSpinsLeft == 0)
+                M_Controls.singleton.StopAutoSpinning();
+            else
+            {
+                yield return new WaitForSeconds(TIME_AUTO_SPINS);
+                M_Controls.singleton.StartAutoSpinning();
+            }
+
+        }
+
     }
 
     private void TurnOffPayline(PayLine payline)
