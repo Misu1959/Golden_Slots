@@ -31,6 +31,8 @@ public class M_UI_Controls : MonoBehaviour
     [SerializeField] private Button buttonTakePayout;
     [SerializeField] private Button buttonSkipAnimations;
 
+    private bool overrideControls;
+
     private void Awake() => Initialize();
 
     private void Start() => Setup();
@@ -53,6 +55,25 @@ public class M_UI_Controls : MonoBehaviour
         SetSpinControls();
     }
 
+    public void OverrideControls(bool _overrideControls)
+    {
+        overrideControls = _overrideControls;
+
+        EnableAutoSpinsButton();
+        EnableDecreaseAutoSpinsButton();
+        EnableIncreaseAutoSpinsButton();
+
+        EnableMaxLinesButton();
+        EnableDecreaseLinesButton();
+        EnableIncreaseLinesButton();
+
+        EnableMaxBetButton();
+        EnableDecreaseBetButton();
+        EnableIncreaseBetButton();
+
+        EnableTotalMaxBetButton();
+    }
+
     #region Info
 
     private void SetInfoControls()
@@ -63,7 +84,6 @@ public class M_UI_Controls : MonoBehaviour
         => buttonInfo.onClick.AddListener(M_UI_Info.singleton.OpenInfoPanel);
 
     #endregion
-
 
     #region Auto Spins
 
@@ -82,11 +102,16 @@ public class M_UI_Controls : MonoBehaviour
         => buttonIncreaseAutoSpins.onClick.AddListener(M_Controls.singleton.IncreaseAutoSpins);
 
 
-    private void EnableDecreaseAutoSpinsButton() 
-        => buttonDecreaseAutoSpins.interactable = M_Controls.singleton.autoSpins != Constants.MIN_NR_OF_AUTO_SPINS;
 
-    private void EnableIncreaseAutoSpinsButton() 
-        => buttonIncreaseAutoSpins.interactable = M_Controls.singleton.autoSpins != Constants.MAX_NR_OF_AUTO_SPINS;
+    private void EnableAutoSpinsButton()
+        => buttonStartAutoSpins.interactable = !overrideControls;
+
+    private void EnableDecreaseAutoSpinsButton()
+        => buttonDecreaseAutoSpins.interactable = (overrideControls) ? false : M_Controls.singleton.autoSpins != Constants.MIN_NR_OF_AUTO_SPINS;
+
+    private void EnableIncreaseAutoSpinsButton()
+        => buttonIncreaseAutoSpins.interactable = (overrideControls) ? false : M_Controls.singleton.autoSpins != Constants.MAX_NR_OF_AUTO_SPINS;
+
 
     #endregion
 
@@ -110,10 +135,14 @@ public class M_UI_Controls : MonoBehaviour
         => buttonIncreaseLines.onClick.AddListener(M_Controls.singleton.IncreaseLines);
 
 
-    private void EnableDecreaseLinesButton() => buttonDecreaseLines.interactable = M_Controls.singleton.lines != Constants.MIN_NR_OF_LINES;
-    private void EnableIncreaseLinesButton() => buttonIncreaseLines.interactable = M_Controls.singleton.lines != Constants.MAX_NR_OF_LINES;
-    #endregion
+    private void EnableMaxLinesButton()
+        => buttonMaxLines.interactable = !overrideControls;
 
+    private void EnableDecreaseLinesButton() 
+        => buttonDecreaseLines.interactable = (overrideControls) ? false : M_Controls.singleton.lines != Constants.MIN_NR_OF_LINES;
+    private void EnableIncreaseLinesButton() 
+        => buttonIncreaseLines.interactable = (overrideControls) ? false : M_Controls.singleton.lines != Constants.MAX_NR_OF_LINES;
+    #endregion
 
     #region Bet 
 
@@ -139,13 +168,18 @@ public class M_UI_Controls : MonoBehaviour
         => buttonTotalMaxBet.onClick.AddListener(M_Controls.singleton.TotalMaxBet);
 
 
-    private void EnableDecreaseBetButton() => buttonDecreaseBet.interactable = M_Controls.singleton.bet != Constants.MIN_BET;
-    private void EnableIncreaseBetButton() => buttonIncreaseBet.interactable = M_Controls.singleton.bet != Constants.MAX_BET;
+    private void EnableMaxBetButton()
+        => buttonMaxBet.interactable = !overrideControls;
 
+    private void EnableDecreaseBetButton() 
+        => buttonDecreaseBet.interactable = (overrideControls) ? false : M_Controls.singleton.bet != Constants.MIN_BET;
+    private void EnableIncreaseBetButton() 
+        => buttonIncreaseBet.interactable = (overrideControls) ? false : M_Controls.singleton.bet != Constants.MAX_BET;
+
+    private void EnableTotalMaxBetButton()
+        => buttonTotalMaxBet.interactable = !overrideControls;
 
     #endregion
-
-
 
     #region Spin
 

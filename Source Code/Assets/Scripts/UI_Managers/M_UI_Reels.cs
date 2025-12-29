@@ -28,7 +28,9 @@ public class M_UI_Reels : MonoBehaviour
 
     private float animTime_Spin;
     private float animTime_PayLine;
-    private bool skipAnimations;
+
+    private bool skipSpinAnimation;
+    private bool skipPayoutAnimation;
 
 
 
@@ -53,7 +55,10 @@ public class M_UI_Reels : MonoBehaviour
 
     public void SkipAnimations()
     {
-        skipAnimations = true;
+        if (skipSpinAnimation)
+            skipPayoutAnimation = true;
+        
+        skipSpinAnimation = true;
 
         foreach (RectTransform uiReel in UI_reels)
             uiReel.GetComponent<UI_Reel>().ForceStop();
@@ -79,7 +84,8 @@ public class M_UI_Reels : MonoBehaviour
     private IEnumerator AnimateScreen()
     {
         M_UI_Controls.singleton.ToggleSkipAnimationsButton(true);
-        
+        M_UI_Controls.singleton.OverrideControls(true);
+
         DisplayReels();
 
         foreach (RectTransform uiReel in UI_reels)
@@ -88,55 +94,64 @@ public class M_UI_Reels : MonoBehaviour
         animTime_Spin = 0;
         while (animTime_Spin < ANIM_TIME_SPIN)
         {
-            if (skipAnimations)
+            if (skipSpinAnimation)
                 break;
             
             animTime_Spin += Time.deltaTime;
             yield return null;
         }
-        
 
 
-        // Turn off all unused Paylines
-        for (int i = (int)M_Controls.singleton.lines; i < (int)MAX_NR_OF_LINES; i++)
-            TurnOffPayline(M_Payment.singleton.payLines[i]);
 
-        // Turn on all used winning paylines
-        for (int i = 0; i < (int)M_Controls.singleton.lines; i++)
+        for (int i = 0; i <= (int)MAX_NR_OF_LINES; i++)
         {
             PayLine payLine = M_Payment.singleton.payLines[i];
 
-            M_Credits.singleton.AddPayout(M_Payment.singleton.CalculatePayLine(payLine));
-            
-            if (payLine.IsWinning())
+            if (i > (int)M_Controls.singleton.lines && payLine.type == PayLineType.BasicLine)
             {
-                TurnOnPayline(payLine);
-
-                animTime_PayLine = 0;
-                while (animTime_PayLine < ANIM_TIME_PER_PAYLINE)
-                {
-                    if (skipAnimations)
-                        break;
-
-                    animTime_PayLine += Time.deltaTime;
-                    yield return null;
-                }
-                
                 TurnOffPayline(payLine);
+                continue;
             }
+
+            if(payLine.payout == 0)
+            {
+                TurnOffPayline(payLine);
+                continue;
+            }
+
+            M_Credits.singleton.AddPayout(payLine.payout);
+            
+            TurnOnPayline(payLine);
+
+            animTime_PayLine = 0;
+            while (animTime_PayLine < ANIM_TIME_PER_PAYLINE)
+            {
+                if (skipPayoutAnimation)
+                    break;
+
+                animTime_PayLine += Time.deltaTime;
+                yield return null;
+            }
+                
+            TurnOffPayline(payLine);
         }
 
+        skipSpinAnimation = false;
+        skipPayoutAnimation = false;
+
         M_UI_Controls.singleton.ToggleSkipAnimationsButton(false);
-        skipAnimations = false;
+        M_UI_Controls.singleton.OverrideControls(false);
     }
+
     private void TurnOffPayline(PayLine payline)
     {
-        UI_paylines[payline.index].gameObject.SetActive(false);
+        if (payline.type == PayLineType.BasicLine) // To avoid Scatter payline
+            UI_paylines[payline.index].gameObject.SetActive(false);
     
-        for(int i = 0; i < payline.reelSquare.Count; i++)
+        for(int i = 0; i < payline.squares.Count; i++)
         {
-            int reelIndex   = payline.reelSquare[i].Item1;
-            int squareIndex = payline.reelSquare[i].Item2;
+            int reelIndex   = payline.squares[i].Item1;
+            int squareIndex = payline.squares[i].Item2;
 
             StartCoroutine(TurnSymbolFrameOff(reelIndex, squareIndex));
         }
@@ -144,13 +159,14 @@ public class M_UI_Reels : MonoBehaviour
 
     private void TurnOnPayline(PayLine payline)
     {
-        UI_paylines[payline.index].gameObject.SetActive(true);
+        if (payline.type == PayLineType.BasicLine) // To avoid Scatter payline
+            UI_paylines[payline.index].gameObject.SetActive(true);
 
 
         for (int i = 0; i < payline.symbols.Count; i++)
         {
-            int reelIndex = payline.reelSquare[i].Item1;
-            int squareIndex = payline.reelSquare[i].Item2;
+            int reelIndex = payline.squares[i].Item1;
+            int squareIndex = payline.squares[i].Item2;
 
             StartCoroutine(TurnSymbolFrameOn(payline.index, reelIndex, squareIndex));
         }
@@ -172,11 +188,14 @@ public class M_UI_Reels : MonoBehaviour
     public IEnumerator TurnSymbolFrameOn(int paylineIndex, int reelIndex, int squareIndex)
     {
         Transform UI_square = UI_reels[reelIndex].GetChild(0).GetChild(squareIndex + 1);
-        
-        Transform UI_frame = UI_square.GetChild(0);
-        UI_frame.gameObject.SetActive(true);
-        UI_frame.GetChild(0).GetComponent<Image>().sprite = symbolBorders[paylineIndex];
 
+        if (paylineIndex < (int)MAX_NR_OF_LINES)
+        {
+            Transform UI_frame = UI_square.GetChild(0);
+            UI_frame.gameObject.SetActive(true);
+
+            UI_frame.GetChild(0).GetComponent<Image>().sprite = symbolBorders[paylineIndex];
+        }
 
         yield return null;
 
@@ -188,6 +207,8 @@ public class M_UI_Reels : MonoBehaviour
     {
         foreach (Reel reel in M_Reels.singleton.reels)
             DisplayReel(reel);
+
+        M_Payment.singleton.UpdatePayLines();
     }
 
     private void DisplayReel(Reel reel)

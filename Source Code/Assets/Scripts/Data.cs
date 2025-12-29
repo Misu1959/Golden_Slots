@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -19,15 +20,17 @@ public enum Symbols
     seven,
 
     scatter,
-    wild
+    wild,
+    none
+
 }
 
 [Serializable]
-public enum DoubleDownCards
+public enum PayLineType
 {
-    red,
-    black
-};
+    BasicLine,
+    ScatterLine
+}
 
 
 [Serializable]
@@ -618,8 +621,6 @@ public class Reel
 
     public int index {  get; private set; }
 
-    public int stopIndex {  get; private set; }
-
     public Reel(int _index) => index = _index;
 
     public void Spin()
@@ -629,10 +630,7 @@ public class Reel
         int top = (center == 0) ? Constants.NR_OF_STOPS - 1 : center - 1;
         int bottom = (center == Constants.NR_OF_STOPS - 1) ? 0 : center + 1;
 
-        stopIndex = center;
-
         Set(VirtualReels.reels[index][top], VirtualReels.reels[index][center], VirtualReels.reels[index][bottom]);
-
     }
     private void Set(Symbols top, Symbols center, Symbols bottom)
     {
@@ -646,81 +644,158 @@ public class Reel
 
 
 
-public class PayLine
+public class PayLine : IEquatable<PayLine>
 {
     public int index { get; private set; }
 
-    private Symbols symbolType = Symbols.wild;
+    public PayLineType type { get; private set; }
+
+
+    private Symbols symbolType = Symbols.none;
+
     public List<Symbols> symbols { get; private set; } = new List<Symbols>();
-
-    public List<(int, int)> reelSquare { get; private set; } = new List<(int, int)>(); // item1 = reelIndex, item2 = squareIndex
-    private int reelIndex = 0;
+    public List<(int, int)> squares { get; private set; } = new List<(int, int)>(); // item1 = reelIndex, item2 = squareIndex
 
 
 
-    public PayLine(int _index) => index = _index;  // Used for creating the actual paylines
+    public PayLine(int paylineIndex)
+    {
+        index = paylineIndex;
+
+        if (index == (int)Constants.MAX_NR_OF_LINES)
+            type = PayLineType.ScatterLine;
+
+    } // Used for creating the actual paylines
+
     public PayLine(List<Symbols> _symbols) => symbols = _symbols; // Used for creating the pay table
 
-    public void AddReelSquare(int squareIndex) => reelSquare.Add((reelIndex++, squareIndex));
+
+    public int payout {  get; private set; }
+
+    public void AddSquare(int reelIndex, int squareIndex) => squares.Add((reelIndex, squareIndex));
+    private void ClearSquares() => squares.Clear();
 
 
-    public void Clear() => symbols.Clear();
-    public void Add(Symbols symbol)
+    public void Update()
     {
-        if (symbol == Symbols.wild)
+        if(type == PayLineType.BasicLine)
         {
-            symbol = symbolType;
-            symbols.Add(symbolType);
+            ClearSymbols();
+
+            foreach ((int, int) square in squares)
+            {
+                Symbols symbol = M_Reels.singleton.reels[square.Item1].squares[square.Item2];
+                AddSymbol(symbol); // Add new symbol to payline
+
+            }
         }
-        else if(symbol != Symbols.wild)
+        else if(type == PayLineType.ScatterLine)
         {
-            if (symbolType != Symbols.wild)
-                symbols.Add(symbol);
+            ClearSquares();
+            ClearSymbols();
+
+            for (int reelIndex = 0; reelIndex < Constants.NR_OF_REELS; reelIndex++)
+                for (int squareIndex = 0; squareIndex < Constants.NR_OF_SQUARES; squareIndex++)
+                {
+                    Symbols symbol = M_Reels.singleton.reels[reelIndex].squares[squareIndex];
+
+                    if (symbol == Symbols.scatter)
+                    {
+                        AddSquare(reelIndex, squareIndex);
+                        symbols.Add(symbol);
+                    }
+                }
+        }
+
+        payout = CalculatePayout();
+    }
+    private void AddSymbol(Symbols symbol)
+    {
+
+        if (type == PayLineType.BasicLine)
+        {
+            if (symbol == Symbols.wild)
+            {
+                if(symbols.Count == 0)
+                    symbolType = Symbols.wild;
+    
+                symbols.Add(symbolType);
+
+            }
+            else if (symbol == Symbols.scatter)
+            {
+                if (symbols.Count == 0)
+                    symbolType = Symbols.none;
+
+
+                if (symbolType == Symbols.wild)
+                    symbolType = Symbols.none;
+
+                symbols.Add(Symbols.none);
+            }
             else
             {
-                symbolType = symbol;
+                if (symbols.Count == 0)
+                    symbolType = symbol;
 
-                for (int i = 0; i < symbols.Count; i++)
-                    symbols[i] = symbol;
+
+                if (symbolType == Symbols.wild)
+                {
+                    symbolType = symbol;
+
+                    for (int i = 0; i < symbols.Count; i++)
+                        symbols[i] = symbolType;
+                } // Modify existing wilds to the symbol
+
+
 
                 symbols.Add(symbol);
             }
-
-        }         
-
+        }
 
     }
-    public void Remove() => symbols.RemoveAt(symbols.Count - 1);
-
-    
-    public bool IsValid() => symbols.Count > 2;
-    public bool IsWinning() => PayData.payTable.ContainsKey(this);
 
 
+    private void ClearSymbols() => symbols.Clear();
+    private void RemoveSymbol() => symbols.RemoveAt(symbols.Count - 1);
+    private int CalculatePayout()
+    {
+        while (symbols.Count >= 2)
+        {
+
+            if (PayData.payTable.ContainsKey(this))
+                return PayData.payTable[this] * (int)M_Controls.singleton.bet;
+            
+            RemoveSymbol();
+        }
+
+        return 0;
+    }
 
 
-    public override bool Equals(object obj) => Equals(obj as PayLine);
+    public override bool Equals(object obj)
+        => obj is PayLine other && Equals(other);
+
     public bool Equals(PayLine other)
     {
-        if (other == null || symbols.Count != other.symbols.Count)
+        if (other is null)
             return false;
 
-        for (int i = 0; i < symbols.Count; i++)
-        {
-            if (symbols[i] != other.symbols[i])
-                return false;
-        }
+        if (ReferenceEquals(this, other))
+            return true;
 
-        return true;
+        return symbols.SequenceEqual(other.symbols);
     }
+
     public override int GetHashCode()
     {
-        int hash = 17;
-        foreach (var symbol in symbols)
+        unchecked
         {
-            hash = hash * 31 + symbol.GetHashCode();
+            int hash = 17;
+            foreach (var symbol in symbols)
+                hash = hash * 31 + (int)symbol;
+            return hash;
         }
-        return hash;
     }
 }
 
@@ -788,7 +863,10 @@ public static class PayData
             { new PayLine(new List<Symbols> { Symbols.scatter, Symbols.scatter, Symbols.scatter, Symbols.scatter, Symbols.scatter           }), 100 },
     
 
-            { new PayLine(new List<Symbols> { Symbols.wild, Symbols.wild, Symbols.wild, Symbols.wild, Symbols.wild }), 1000 },
+            { new PayLine(new List<Symbols> { Symbols.wild, Symbols.wild                                                                    }), 15  },
+            { new PayLine(new List<Symbols> { Symbols.wild, Symbols.wild, Symbols.wild                                                      }), 200 },
+            { new PayLine(new List<Symbols> { Symbols.wild, Symbols.wild, Symbols.wild, Symbols.wild                                        }), 1000 },
+            { new PayLine(new List<Symbols> { Symbols.wild, Symbols.wild, Symbols.wild, Symbols.wild, Symbols.wild                          }), 5000 }
     };
 
 };
