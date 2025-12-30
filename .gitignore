@@ -40,7 +40,7 @@
 *.pidb.meta
 *.pdb.meta
 *.mdb.meta
-
+*.utemp
 # ======================
 # Build results
 # ======================

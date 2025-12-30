@@ -23,6 +23,9 @@ public class M_Reels : MonoBehaviour
     }
     private void Setup()
     {
+        Application.targetFrameRate = 60;
+
+
         M_Controls.singleton.onSpin += SetReels;
     }
 
