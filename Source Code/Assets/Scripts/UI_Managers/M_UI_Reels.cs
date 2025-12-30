@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -133,19 +134,38 @@ public class M_UI_Reels : MonoBehaviour
             }
                 
             TurnOffPayline(payLine);
+
+            if(payLine.payout > 0 && payLine.type == PayLineType.ScatterLine)
+            {
+                M_Controls.singleton.StopAutoSpinning();
+                M_UI_Controls.singleton.ToggleStopAutoSpinsButton(false);
+
+
+                FreeSpinsAmounts[] values = (FreeSpinsAmounts[])Enum.GetValues(typeof(FreeSpinsAmounts));
+                M_Controls.singleton.EnterFreeSpinsMode(values[payLine.symbols.Count - 3]);
+
+            }
         }
 
         skipSpinAnimation = false;
         skipPayoutAnimation = false;
 
 
-        if (!M_Controls.singleton.isAutoSpinning || M_Controls.singleton.autoSpinsLeft == 0)
+        M_UI_Controls.singleton.ToggleSkipAnimationsButton(false);
+
+        if(!M_Controls.singleton.isAutoSpinning && !M_Controls.singleton.isFreeSpinning)
+            M_UI_Controls.singleton.OverrideControls(false);
+
+
+        if (M_Controls.singleton.isAutoSpinning && M_Controls.singleton.autoSpinsLeft == 0)
         {
-            M_UI_Controls.singleton.ToggleSkipAnimationsButton(false);
             M_UI_Controls.singleton.ToggleStopAutoSpinsButton(false);
-            
             M_UI_Controls.singleton.OverrideControls(false);
         }
+
+
+        if (M_Controls.singleton.isFreeSpinning && M_Controls.singleton.freeSpinsLeft == 0)
+            M_Controls.singleton.ExitFreeSpinsMode();
 
 
         if (M_Controls.singleton.isAutoSpinning)
@@ -159,7 +179,6 @@ public class M_UI_Reels : MonoBehaviour
             }
 
         }
-
     }
 
     private void TurnOffPayline(PayLine payline)
@@ -235,4 +254,5 @@ public class M_UI_Reels : MonoBehaviour
         for (int squareIndex = 0; squareIndex < NR_OF_SQUARES; squareIndex++)
             UI_reels[reel.index].GetChild(0).GetChild(squareIndex+1).GetComponent<Animator>().SetInteger("AnimNumber", (int)reel.squares[squareIndex]);
     }
+
 }

@@ -1,71 +1,77 @@
-# ================================
-# Unity Generated Files & Folders
-# ================================
+# ======================
+# Unity generated folders
+# ======================
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
+[Uu]ser[Ss]ettings/
 [Mm]emoryCaptures/
+
+# ======================
+# Unity cache
+# ======================
+/**/[Aa]ssets/AssetStoreTools*
+
+# ======================
+# Visual Studio / Rider / VS Code
+# ======================
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
 *.pidb
 *.booproj
 *.svd
 *.pdb
 *.mdb
 *.opendb
+
+# ======================
+# Unity auto-generated files
+# ======================
+*.unityproj
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# ======================
+# Build results
+# ======================
 *.apk
 *.aab
+*.exe
+*.app
+*.ipa
+*.xcodeproj
+*.xcworkspace
 
-# ================================
-# Unity Auto-generated Project Files
-# ================================
-*.csproj
-*.unityproj
-*.sln
-*.suo
-*.tmp
-*.user
-*.userprefs
-
-# ================================
-# Visual Studio / IDE Files
-# ================================
-.vs/
-.idea/
-*.sln.iml
-
-# ================================
-# OS Generated Files
-# ================================
+# ======================
+# OS generated files
+# ======================
 .DS_Store
+.DS_Store?
 Thumbs.db
+ehthumbs.db
+desktop.ini
 
-# ================================
-# Android/Gradle Build Files
-# ================================
+# ======================
+# Crash reports
+# ======================
+sysinfo.txt
+
+# ======================
+# JetBrains Rider plugin
+# ======================
+Assets/Plugins/Editor/JetBrains*
+
+# ======================
+# Gradle (Android)
+# ======================
 .gradle/
-*.gradle
-*.keystore
-*.jks
-*.log
-*.bak
-
-# ================================
-# CMake / Build System Files
-# ================================
-/Source Code/.utmp/
-/Source Code/Build/
-/Source Code/obj/
-*.ninja
-*.ninja_log
-*.cmake
-CMakeCache.txt
-CMakeFiles/
-
-# ================================
-# Backup / Temporary Files
-# ================================
-*.swp
-*.tmp
-*.backup

@@ -73,8 +73,22 @@ public enum BetAmounts
 };
 
 
+[Serializable]
+public enum FreeSpinsAmounts
+{
+    _7 = 7,
+    _10 = 10,
+    _15 = 15,
+};
 
-
+[Serializable]
+public enum MultiplierAmounts
+{
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _5 = 5,
+};
 
 public class Constants
 {
@@ -765,7 +779,7 @@ public class PayLine : IEquatable<PayLine>
         {
 
             if (PayData.payTable.ContainsKey(this))
-                return PayData.payTable[this] * (int)M_Controls.singleton.bet;
+                return PayData.payTable[this] * (int)M_Controls.singleton.bet * (int)M_Controls.singleton.multiplier;
             
             RemoveSymbol();
         }

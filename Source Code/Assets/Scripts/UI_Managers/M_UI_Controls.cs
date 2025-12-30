@@ -1,10 +1,16 @@
-using TMPro;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class M_UI_Controls : MonoBehaviour
 {
     public static M_UI_Controls singleton;
+
+    [Header("Sprites")]
+    [SerializeField] private Sprite bannerLogo;
+    [SerializeField] private Sprite bannerFreeSpins;
+
 
     [Header("Info")]
     [SerializeField] private Button buttonInfo;
@@ -31,6 +37,17 @@ public class M_UI_Controls : MonoBehaviour
     [SerializeField] private Button buttonTakePayout;
     [SerializeField] private Button buttonStopAutoSpins;
     [SerializeField] private Button buttonSkipAnimations;
+
+    [Header("Free Spins")]
+    [SerializeField] private GameObject banner;
+    [SerializeField] private GameObject displayMultiplier;
+    [SerializeField] private GameObject displayFreeSpins;
+
+    [SerializeField] private GameObject treasureBonusPanel;
+    [SerializeField] private List<Button> buttonsTreasureBonusOption;
+
+
+
 
     private bool overrideControls;
 
@@ -202,6 +219,8 @@ public class M_UI_Controls : MonoBehaviour
 
     private void SetSpinControls()
     {
+        SetTreasureBonusPanel();
+
         SetSpinButton();
         SetTakePayoutButton();
         SetSkipAnimationsButton();
@@ -226,7 +245,7 @@ public class M_UI_Controls : MonoBehaviour
 
     private void ToggleSpinButton() => buttonSpin.interactable = M_Credits.singleton.creditAmount >= M_Controls.singleton.totalBet;
 
-    private void ToggleTakePayoutButton() => buttonTakePayout.gameObject.SetActive(M_Credits.singleton.payout > 0);
+    public void ToggleTakePayoutButton() => buttonTakePayout.gameObject.SetActive(M_Credits.singleton.payout > 0 && !M_Controls.singleton.isFreeSpinning);
 
     public void ToggleStopAutoSpinsButton(bool state) => buttonStopAutoSpins.gameObject.SetActive(state);
 
@@ -235,4 +254,83 @@ public class M_UI_Controls : MonoBehaviour
 
     #endregion
 
+
+    #region Free Spins
+
+
+    private void SetTreasureBonusPanel()
+    {
+        foreach (Button treasureBonusOption in buttonsTreasureBonusOption)
+            treasureBonusOption.onClick.AddListener(() => StartCoroutine(PlayTreasureBonusOptionAnimation(treasureBonusOption.GetComponent<Animator>())));
+
+        treasureBonusPanel.GetComponent<Button>().onClick.AddListener(CloseTreasureBonusPanel);
+    }
+
+
+    public void ToggleBannerFreeSpins(bool status)
+        => banner.GetComponent<Image>().sprite = status ? bannerFreeSpins : bannerLogo;
+    public void ToggleMultiplierLabel(bool state) => displayMultiplier.SetActive(state);
+
+    public void ToggleFreeSpinsLabel(bool state) => displayFreeSpins.SetActive(state);
+
+
+    public void OpenTreasureBonusPanel()
+    {
+        canBeClosed = false;
+
+        treasureBonusPanel.SetActive(true);
+        SetTreasureBonusOptions();
+
+        M_UI_Labels.singleton.DisplayTreasureBonus();
+    }
+
+
+    private bool canBeClosed;
+    public void CloseTreasureBonusPanel()
+    {
+        if(!canBeClosed) return;
+
+        treasureBonusPanel.SetActive(false);
+
+        foreach (Button treasureBonusOption in buttonsTreasureBonusOption)
+            treasureBonusOption.GetComponent<Animator>().SetBool("Play", false);
+
+    }
+
+    private void SetTreasureBonusOptions()
+    {
+        List<int> options = new List<int>() { 2, 3, 5 };
+
+
+        foreach (Button treasureBonusOption in buttonsTreasureBonusOption)
+        {
+            treasureBonusOption.interactable = true;
+
+            int option = options[Random.Range(0, options.Count)];
+            options.Remove(option);
+
+            treasureBonusOption.GetComponent<Animator>().SetInteger("Option", option);
+        }
+    }
+
+    private IEnumerator PlayTreasureBonusOptionAnimation(Animator animatorOption)
+    {
+        M_Controls.singleton.multiplier = (MultiplierAmounts)animatorOption.GetComponent<Animator>().GetInteger("Option");
+        
+        M_UI_Labels.singleton.DisplayTreasureBonus();
+        M_UI_Labels.singleton.DisplayMultiplier();
+
+
+        foreach (Button treasureBonusOption in buttonsTreasureBonusOption)
+            treasureBonusOption.interactable = false;
+
+
+        animatorOption.GetComponent<Animator>().SetBool("Play", true);
+
+        yield return new WaitForSeconds(1);
+        canBeClosed = true;
+    }
+
+
+    #endregion
 }

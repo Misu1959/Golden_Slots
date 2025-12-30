@@ -12,8 +12,10 @@ public class M_UI_Labels : MonoBehaviour
     [SerializeField] private TextMeshProUGUI labelBet;
     [SerializeField] private TextMeshProUGUI labelTotalBet;
     [SerializeField] private TextMeshProUGUI labelPayout;
-    
 
+    [SerializeField] private TextMeshProUGUI labelMultiplier;
+    [SerializeField] private TextMeshProUGUI labelFreeSpins;
+    [SerializeField] private TextMeshProUGUI labelTreasureBonus;
 
     private void Awake() => Initialize();
 
@@ -40,6 +42,9 @@ public class M_UI_Labels : MonoBehaviour
         M_Controls.singleton.onBetChange += DisplayBet;
         M_Controls.singleton.onTotalBetChange += DisplayTotalBet;
 
+
+
+
         DisplayCredit();
         DisplayPayout();
     }
@@ -51,6 +56,14 @@ public class M_UI_Labels : MonoBehaviour
     private void DisplayLines() => labelLines.text = ((int)M_Controls.singleton.lines).ToString();
     private void DisplayBet() => labelBet.text = ((int)M_Controls.singleton.bet).ToString();
     private void DisplayTotalBet() => labelTotalBet.text = M_Controls.singleton.totalBet.ToString();
-    
-    
+
+
+    public void DisplayMultiplier() => labelMultiplier.text = ((int)M_Controls.singleton.multiplier).ToString();
+    public void DisplayFreeSpins() => labelFreeSpins.text = M_Controls.singleton.freeSpinsLeft.ToString();
+
+    public void DisplayTreasureBonus()
+    {
+        string mult = M_Controls.singleton.multiplier == MultiplierAmounts._1 ? "??" : ((int)M_Controls.singleton.multiplier).ToString()+"x";
+        labelTreasureBonus.text = "You won " + M_Controls.singleton.freeSpinsLeft + " free spins" + "\nwith a " + mult + " multiplier";
+    }
 }

@@ -47,7 +47,9 @@ public class M_Credits : MonoBehaviour
     }
     private void RemoveCredit(int creditAmountToRemove)
     {
-        creditAmount -= creditAmountToRemove;
+        if (!M_Controls.singleton.isFreeSpinning)
+            creditAmount -= creditAmountToRemove;
+        
         onCreditsChange?.Invoke();
     }
 

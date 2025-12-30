@@ -15,13 +15,21 @@ public class M_Controls : MonoBehaviour
 
 
     public AutoSpinAmounts autoSpins { get; private set; } = MIN_NR_OF_AUTO_SPINS;
+    public int autoSpinsLeft { get; private set; } = (int)MIN_NR_OF_AUTO_SPINS;
+    public bool isAutoSpinning { get; private set; }
+
+
     public LineAmounts lines { get; private set; } = MIN_NR_OF_LINES;
     public BetAmounts bet { get; private set; } = MIN_BET;
     public int totalBet { get; private set; } // total bet = bet * lines
 
 
-    public int autoSpinsLeft { get; private set; } = (int)MIN_NR_OF_AUTO_SPINS;
-    public bool isAutoSpinning { get; private set; }
+
+    [HideInInspector] public MultiplierAmounts multiplier = MultiplierAmounts._1;
+    public int freeSpinsLeft { get;private set; }
+    public bool isFreeSpinning {  get; private set; }
+
+
 
     private void Awake() => Initialize();
     void Start() => Invoke(nameof(Setup), Time.deltaTime);
@@ -240,5 +248,55 @@ public class M_Controls : MonoBehaviour
 
     public void Spin() => onSpin?.Invoke();
 
+    #endregion
+
+
+    #region Free Spins
+
+    public void EnterFreeSpinsMode(FreeSpinsAmounts freeSpins)
+    {
+        freeSpinsLeft += (int)freeSpins;
+        if (!isFreeSpinning)
+        {
+            onSpin += DecreaseFreeSpins;
+            M_UI_Controls.singleton.OpenTreasureBonusPanel();
+        }
+
+        isFreeSpinning = true;
+
+
+
+        M_UI_Controls.singleton.OverrideControls(true);
+
+        M_UI_Controls.singleton.ToggleBannerFreeSpins(true);
+        M_UI_Controls.singleton.ToggleMultiplierLabel(true);
+        M_UI_Controls.singleton.ToggleFreeSpinsLabel(true);
+
+        M_UI_Labels.singleton.DisplayMultiplier();
+        M_UI_Labels.singleton.DisplayFreeSpins();
+    }
+
+    public void ExitFreeSpinsMode()
+    {
+        onSpin -= DecreaseFreeSpins;
+
+        multiplier = MultiplierAmounts._1;
+        isFreeSpinning = false;
+
+
+        M_UI_Controls.singleton.OverrideControls(false);
+
+        M_UI_Controls.singleton.ToggleBannerFreeSpins(false);
+        M_UI_Controls.singleton.ToggleMultiplierLabel(false);
+        M_UI_Controls.singleton.ToggleFreeSpinsLabel(false);
+        
+        M_UI_Controls.singleton.ToggleTakePayoutButton();
+    }
+
+    void DecreaseFreeSpins()
+    {
+        freeSpinsLeft--;
+        M_UI_Labels.singleton.DisplayFreeSpins();
+    }
     #endregion
 }
