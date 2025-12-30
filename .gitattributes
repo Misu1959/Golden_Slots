@@ -1,0 +1,12 @@
+# Ignore shaders completely from GitHub language stats
+*.shader linguist-vendored
+*.hlsl linguist-vendored
+*.cginc linguist-vendored
+*.compute linguist-vendored
+
+# Optional Unity files
+*.unity linguist-vendored
+*.mat linguist-vendored
+
+# Force C# as primary language
+*.cs linguist-language=C#
